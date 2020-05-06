@@ -1,9 +1,10 @@
 import random
 class dice():
     def __init__(self,sides):
-        self.sideUp = random.randint(1,sides)
-    def roll(self, sides):
-        self.__init__(sides)
+        self.sides = sides
+        self.sideUp = random.randint(1,self.sides)
+    def roll(self):
+        self.sideUp = random.randint(1,self.sides)
 
 def main():
     dices = []
@@ -12,7 +13,14 @@ def main():
         print(dice1.sideUp)
         dices.append(dice)
     player1 = player()
-    player1.turn()
+    player1.turn(dices)
+
+def countFace(diceList,sideUp):
+    returnValue = 0
+    for dice in diceList:
+        if dice.sideUp == sideUp:
+            returnValue += 1
+    return returnValue
 
 def pick(x,choices,freeDice,Rvalue):
     if x == 0:
@@ -20,12 +28,6 @@ def pick(x,choices,freeDice,Rvalue):
     Rvalue += choices[x][1]
     freeDice -= choices[x][0]
     choices.pop(x)
-
-def roll(number):
-    dice = []
-    for i in range(0,number):
-        dice.append(random.randint(1,6)) 
-    return dice
     
 def showchoices(player,dice,freeDice):
     print('showing choices')
@@ -201,7 +203,6 @@ class player:
     score = 0
     alive = True
     onTable = score > 1000
-    dice = roll(6)
     print('player')
     
     def turn(self):
