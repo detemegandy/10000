@@ -3,15 +3,26 @@ class dice():
     def __init__(self,sides):
         self.sides = sides
         self.sideUp = random.randint(1,self.sides)
+        self.saved = False
+    def __repr__(self):
+        return "(sides: " + str(self.sides) + ", sideUp: " + str(self.sideUp) + ", saved: " + str(self.saved)+")"
+    def __str__(self):
+        return "(sides: " + str(self.sides) + ", sideUp: " + str(self.sideUp) + ", saved: " + str(self.saved)+")"
     def roll(self):
+        if self.saved == False:
+            self.sideUp = random.randint(1,self.sides)
+    def save(self):
+        self.saved = True
+    def rollSaved(self):
         self.sideUp = random.randint(1,self.sides)
+        self.saved == False
 
 def main():
     dices = []
     for i in range(6):
         dice1 = dice(6)
-        print(dice1.sideUp)
-        dices.append(dice)
+        dices.append(dice1)
+    print(*dices)
     player1 = player()
     player1.turn(dices)
 
@@ -183,17 +194,12 @@ def showchoices(player,dice,freeDice):
         pick(human,choices,freeDice,Rvalue)
              
     return Rvalue
-    #group dice?
 
     #search for scoring combinations in dices
 
     #remove choices less than 1000
 
     #choices bring dice out of play (dice.inplay = False)?
-
-    #store scoring combinations
-
-    #make dice objects
 
     #put dices into collections
 
@@ -205,20 +211,19 @@ class player:
     onTable = score > 1000
     print('player')
     
-    def turn(self):
+    def turn(self,diceList):
         currentscore = 0
-        freeDice = 6
+        freeDice = len(diceList)
         self.alive = True
         print('turn')
         while self.alive:
             print('currentscore: ' + str(currentscore))
-            print(self.dice)
-            currentscore += showchoices(self,self.dice,freeDice)
+            print(diceList)
+            currentscore += showchoices(self,diceList,freeDice)
             if freeDice == 0:
-                self.dice = roll(6)
+                diceList = map(lambda dice: dice.roll, diceList)
             else:
-                self.dice = roll(freeDice)
-
+                diceList = map(lambda dice: dice.rollSaved, diceList)
 
 main()
     
