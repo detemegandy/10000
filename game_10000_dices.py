@@ -1,13 +1,13 @@
 import random
 class dice():
-    def __init__(self,sides):
+    def __init__(self,sides=6):
         self.sides = sides
         self.sideUp = random.randint(1,self.sides)
         self.saved = False
     def __repr__(self):
         return "(sides: " + str(self.sides) + ", sideUp: " + str(self.sideUp) + ", saved: " + str(self.saved)+")"
     def __str__(self):
-        return "(sides: " + str(self.sides) + ", sideUp: " + str(self.sideUp) + ", saved: " + str(self.saved)+")"
+        return str(self.sideUp)
     def roll(self):
         if self.saved == False:
             self.sideUp = random.randint(1,self.sides)
@@ -20,7 +20,7 @@ class dice():
 def main():
     dices = []
     for i in range(6):
-        dice1 = dice(6)
+        dice1 = dice()
         dices.append(dice1)
     print(*dices)
     player1 = player()
@@ -33,6 +33,9 @@ def countFace(diceList,sideUp):
             returnValue += 1
     return returnValue
 
+def countAllFaces(diceList):
+    return (countFace(diceList,1),countFace(diceList,2),countFace(diceList,3),countFace(diceList,4),countFace(diceList,5),countFace(diceList,6))
+
 def pick(x,choices,freeDice,Rvalue):
     if x == 0:
         return
@@ -40,17 +43,11 @@ def pick(x,choices,freeDice,Rvalue):
     freeDice -= choices[x][0]
     choices.pop(x)
     
-def showchoices(player,dice,freeDice):
+def showchoices(player,diceList):
     print('showing choices')
     
     Rvalue = 0
-    get_indexes = lambda dice, xs: [i for (y, i) in zip(xs, range(len(xs))) if dice == y]
-    one =   len(get_indexes(1,dice))
-    two =   len(get_indexes(2,dice))
-    three = len(get_indexes(3,dice))
-    four =  len(get_indexes(4,dice))
-    five =  len(get_indexes(5,dice))
-    six =   len(get_indexes(6,dice))
+    one,two,three,four,five,six = countAllFaces(diceList)
 
     #score straight and 3 pairs
     numberOfFaces = [one,two,three,four,five,six]
@@ -206,20 +203,21 @@ def showchoices(player,dice,freeDice):
     #use methods on whole collection similar to array operator scalar ?
                     
 class player:
-    score = 0
-    alive = True
-    onTable = score > 1000
-    print('player')
+
+    def __init__(self):
+        score = 0
+        alive = True
+        onTable = score > 1000
+        print('player')
     
     def turn(self,diceList):
         currentscore = 0
-        freeDice = len(diceList)
         self.alive = True
         print('turn')
         while self.alive:
             print('currentscore: ' + str(currentscore))
             print(diceList)
-            currentscore += showchoices(self,diceList,freeDice)
+            currentscore += showchoices(self,diceList)
             if freeDice == 0:
                 diceList = map(lambda dice: dice.roll, diceList)
             else:
