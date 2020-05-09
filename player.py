@@ -9,4 +9,10 @@ class player:
         return self.score > 1000
 
     def addScore(self,amount):
-        self.score += amount
+        if self.score > 1000 and amount > 0:
+            self.score += amount
+            return 1
+        elif amount >= 1000:
+            self.score += amount
+            return 1
+        return 0
