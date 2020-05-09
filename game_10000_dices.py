@@ -1,21 +1,14 @@
-import random
-class dice():
-    def __init__(self,sides=6):
-        self.sides = sides
-        self.sideUp = random.randint(1,self.sides)
-        self.saved = False
-    def __repr__(self):
-        return "(sides: " + str(self.sides) + ", sideUp: " + str(self.sideUp) + ", saved: " + str(self.saved)+")"
-    def __str__(self):
-        return str(self.sideUp)
-    def roll(self):
-        if self.saved == False:
-            self.sideUp = random.randint(1,self.sides)
-    def save(self):
-        self.saved = True
-    def rollSaved(self):
-        self.sideUp = random.randint(1,self.sides)
-        self.saved == False
+from dice import dice
+
+
+#game object
+##game setup
+###number of players (default 2)
+###create dices
+###dices lists
+####roll list
+####grouped list
+
 
 def main():
     dices = []
@@ -205,23 +198,26 @@ def showchoices(player,diceList):
 class player:
 
     def __init__(self):
-        score = 0
-        alive = True
-        onTable = score > 1000
+        self.score = 0
+        self.alive = True
         print('player')
     
+    def onTable(self):
+        return self.score > 1000
+
     def turn(self,diceList):
         currentscore = 0
         self.alive = True
         print('turn')
         while self.alive:
             print('currentscore: ' + str(currentscore))
-            print(diceList)
+            print(*diceList)
             currentscore += showchoices(self,diceList)
+            print("map: " + map(lambda dice: int(not dice.saved),diceList))
             if freeDice == 0:
-                diceList = map(lambda dice: dice.roll, diceList)
-            else:
                 diceList = map(lambda dice: dice.rollSaved, diceList)
+            else:
+                diceList = map(lambda dice: dice.rollUnSaved, diceList)
 
 main()
     
