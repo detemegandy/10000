@@ -1,4 +1,5 @@
 from dice import dice
+from player import player
 
 
 #game object
@@ -17,7 +18,7 @@ def main():
         dices.append(dice1)
     print(*dices)
     player1 = player()
-    player1.turn(dices)
+    turn(player1,dices)
 
 def countFace(diceList,sideUp):
     returnValue = 0
@@ -36,8 +37,8 @@ def pick(x,choices,freeDice,Rvalue):
     freeDice -= choices[x][0]
     choices.pop(x)
     
-def showchoices(player,diceList):
-    print('showing choices')
+def findChoices(player,diceList):
+    print('finding choices')
     
     Rvalue = 0
     one,two,three,four,five,six = countAllFaces(diceList)
@@ -49,11 +50,11 @@ def showchoices(player,diceList):
     if numberOfFaces[2] == 2:
         print('three pairs')
         freeDice = 0
-        return 1500
+        return [[6,1500,0]]
     elif numberOfFaces[5]:
         print('straight')
         freeDice = 0
-        return 2000
+        return [[6,2000,0]]
     choices = []
     choices.append([0,0,0])
     
@@ -79,8 +80,7 @@ def showchoices(player,diceList):
         choices.append([4,2000,1])
         choices.append([5,4000,1])
     if one == 6:
-        freeDice = 0
-        return 8000
+        return [[6,8000,1]]
 
     #score 5's
     if five == 1:
@@ -104,8 +104,7 @@ def showchoices(player,diceList):
         choices.append([4,1000,5])
         choices.append([5,2000,5])
     if five == 6:
-        freeDice = 0
-        return 4000
+        return [[6,4000,5]]
         
     #score 2's
     if two == 3:
@@ -118,8 +117,7 @@ def showchoices(player,diceList):
         choices.append([4,400,2])
         choices.append([5,800,2])
     if two == 6:
-        freeDice = 0
-        return 1600
+        return [[6,1600,2]]
         
     #score 3's
     if three == 3:
@@ -132,8 +130,7 @@ def showchoices(player,diceList):
         choices.append([4,600,3])
         choices.append([5,1200,3])
     if three == 6:
-        freeDice = 0
-        return 2400
+        return [[6,2400,3]]
 
     #score 4's
     if four == 3:
@@ -146,8 +143,7 @@ def showchoices(player,diceList):
         choices.append([4,800,4])
         choices.append([5,1600,4])
     if four == 6:
-        freeDice = 0
-        return 3200
+        return [[6,3200,4]]
         
     #score 6's
     if six == 3:
@@ -160,8 +156,7 @@ def showchoices(player,diceList):
         choices.append([4,1200,6])
         choices.append([5,2400,6])
     if six == 6:
-        freeDice = 0
-        return 4800
+        return [[6,4800,6]]
 
     human = None
     while not human == 0:
@@ -194,30 +189,19 @@ def showchoices(player,diceList):
     #put dices into collections
 
     #use methods on whole collection similar to array operator scalar ?
-                    
-class player:
-
-    def __init__(self):
-        self.score = 0
-        self.alive = True
-        print('player')
-    
-    def onTable(self):
-        return self.score > 1000
-
-    def turn(self,diceList):
-        currentscore = 0
-        self.alive = True
-        print('turn')
-        while self.alive:
-            print('currentscore: ' + str(currentscore))
-            print(*diceList)
-            currentscore += showchoices(self,diceList)
-            print("map: " + map(lambda dice: int(not dice.saved),diceList))
-            if freeDice == 0:
-                diceList = map(lambda dice: dice.rollSaved, diceList)
-            else:
-                diceList = map(lambda dice: dice.rollUnSaved, diceList)
-
+def turn(player,diceList):
+    currentscore = 0
+    player.alive = True
+    print('turn')
+    while player.alive:
+        print('currentscore: ' + str(currentscore))
+        print(*diceList)
+        currentscore += findChoices(player,diceList)
+        print("map: " + map(lambda dice: int(not dice.saved),diceList))
+        if freeDice == 0:
+            diceList = map(lambda dice: dice.rollSaved, diceList)
+        else:
+            diceList = map(lambda dice: dice.rollUnSaved, diceList)
+             
 main()
     
