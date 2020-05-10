@@ -1,3 +1,4 @@
+import time
 from dice import dice
 from player import player
 
@@ -16,31 +17,31 @@ def main():
     for i in range(6):
         dice1 = dice()
         dices.append(dice1)
-    print(*dices)
     player1 = player()
-    turn(player1,dices)
+    while player1.score < 10000:
+        turn(player1,dices)
+        time.sleep(5)
+    print('Reaced 10000 or more! Score: ' + str(player1.score))
 
-def countFace(diceList,sideUp):
+def countFace(diceList:list,face):
     returnValue = 0
     for dice in diceList:
-        if dice.sideUp == sideUp:
+        if dice.sideUp == face and not dice.saved:
             returnValue += 1
     return returnValue
 
 def countAllFaces(diceList):
     return (countFace(diceList,1),countFace(diceList,2),countFace(diceList,3),countFace(diceList,4),countFace(diceList,5),countFace(diceList,6))
 
-def pick(x,choices,freeDice,Rvalue):
-    if x == 0:
-        return
-    Rvalue += choices[x][1]
-    freeDice -= choices[x][0]
-    choices.pop(x)
+def pick(x: int,choices: list):
+    numDice,score,face = choices[x]
+    for i in range(len(choices)-1,-1,-1):
+        if choices[i][2]== face:
+            choices.pop(i)
+    return numDice,score,face,choices
     
-def findChoices(player,diceList):
+def findChoices(diceList):
     print('finding choices')
-    
-    Rvalue = 0
     one,two,three,four,five,six = countAllFaces(diceList)
 
     #score straight and 3 pairs
@@ -49,14 +50,11 @@ def findChoices(player,diceList):
     print(numberOfFaces)
     if numberOfFaces[2] == 2:
         print('three pairs')
-        freeDice = 0
         return [[6,1500,0]]
     elif numberOfFaces[5]:
         print('straight')
-        freeDice = 0
         return [[6,2000,0]]
     choices = []
-    choices.append([0,0,0])
     
     #score 1's
     if one == 1:
@@ -158,50 +156,76 @@ def findChoices(player,diceList):
     if six == 6:
         return [[6,4800,6]]
 
-    human = None
-    while not human == 0:
-    
-        #are we dead?
-        if len(choices) == 1:
-            player.alive = False
-            return 0 #score
-       
-        for choice in choices:
-          print(' ')
-          if choices.index(choice) == 0:
-              if  not Rvalue == 0:
-                  print('Choice 0: Stop rolling and save ' + str(Rvalue)) + '?'
-          else:
-              print('Choice '+ str(choices.index(choice))+': ' + str(choice[0]) +' '\
-                + str(choice[2]) + '\'s for ' + str(choice[1]) + ' points?\n')
-        
-        human = input("choice #")
-        pick(human,choices,freeDice,Rvalue)
-             
-    return Rvalue
+    #https://www.geeksforgeeks.org/print-all-possible-combinations-of-r-elements-in-a-given-array-of-size-n/
+
+    return choices
 
     #search for scoring combinations in dices
 
     #remove choices less than 1000
 
-    #choices bring dice out of play (dice.inplay = False)?
+def askPick(choices: list):
+    bad = True
+    if not len(choices) == 1:
+        for choice in choices:
+            print(' ')
+            print('Choice '+ str(choices.index(choice)) + ': ' + str(choice[0]) +' '\
+            + str(choice[2]) + '\'s for ' + str(choice[1]) + ' points?\n')
+        while bad:
+            try:
+                answer = int(input('Pick : '))
+                bad = False
+            except ValueError:
+                bad = True
+    else:
+        print('Pick : 0')
+        answer = 0
+    return answer
+    
 
-    #put dices into collections
-
-    #use methods on whole collection similar to array operator scalar ?
-def turn(player,diceList):
+def turn(player,diceList:list):
     currentscore = 0
     player.alive = True
     print('turn')
     while player.alive:
         print('currentscore: ' + str(currentscore))
         print(*diceList)
-        currentscore += findChoices(player,diceList)
-        print("map: " + map(lambda dice: int(not dice.saved),diceList))
-        if freeDice == 0:
-            diceList = map(lambda dice: dice.rollSaved, diceList)
+        choices = findChoices(diceList)
+        if len(choices) == 0:
+            break
+        while len(choices):
+            choices = findChoices(diceList)
+            if choices[0][0]==6:
+                currentscore += choices[0][1]
+                choices = []
+                continue
+            playerPick = -1
+            while not -1 < playerPick < len(choices):
+                playerPick = askPick(choices)
+            numDice,score,face,choices = pick(playerPick,choices)
+            currentscore += score
+            for element in diceList:
+                if element.sideUp == face and numDice:
+                    numDice -= element.save(face)
+            while not playerPick=="y" and not playerPick == "n" and len(choices):
+                if player.onTable or currentscore > 999:
+                    playerPick = input('Do you want to pick another? (y/n): ')
+                else:
+                    continue
+            if playerPick == "y":
+                continue
+            elif playerPick == "n":
+                break
+        freeDice = sum(map(lambda dice: int(not dice.saved),diceList))
+        print("freeDice: " + str(freeDice))
+        if not freeDice:
+            diceList = [dice.rollSaved() for dice in diceList]
         else:
-            diceList = map(lambda dice: dice.rollUnSaved, diceList)
-             
+            diceList = [dice.roll() for dice in diceList]
+    player.addScore(currentscore)
+    print('player score: ' + str(player.score))
+    print('turn done')
+    diceList = [dice.rollSaved() for dice in diceList]
+
 main()
     
