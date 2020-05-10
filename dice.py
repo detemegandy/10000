@@ -16,6 +16,7 @@ class dice():
     def roll(self):
         if self.saved == False:
             self.sideUp = random.randint(1,self.sides)
+        return self
 
     def save(self,side):
         if self.sideUp == side:
