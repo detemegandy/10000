@@ -2,26 +2,26 @@ import time
 from dice import dice
 from player import player
 
-
 #game object
 ##game setup
 ###number of players (default 2)
-###create dices
-###dices lists
-####roll list
-####grouped list
-
 
 def main():
     dices = []
     for i in range(6):
         dice1 = dice()
         dices.append(dice1)
-    player1 = player()
-    while player1.score < 10000:
+    player1 = player('Mona')
+    player2 = player('Andreas')
+    while player1.score < 10000 and player2.score < 10000:
         turn(player1,dices)
         time.sleep(5)
-    print('Reaced 10000 or more! Score: ' + str(player1.score))
+        turn(player2,dices)
+    if player1.score < 10000:
+        print('Reaced 10000 or more! Score: ' + str(player1.score))
+    elif player2.score < 10000:
+        print('Reaced 10000 or more! Score: ' + str(player2.score))
+    time.sleep(60)
 
 def countFace(diceList:list,face):
     returnValue = 0
@@ -41,13 +41,11 @@ def pick(x: int,choices: list):
     return numDice,score,face,choices
     
 def findChoices(diceList):
-    print('finding choices')
     one,two,three,four,five,six = countAllFaces(diceList)
 
     #score straight and 3 pairs
     numberOfFaces = [one,two,three,four,five,six]
     numberOfFaces.sort(reverse = True)
-    print(numberOfFaces)
     if numberOfFaces[2] == 2:
         print('three pairs')
         return [[6,1500,0]]
@@ -186,7 +184,8 @@ def askPick(choices: list):
 def turn(player,diceList:list):
     currentscore = 0
     player.alive = True
-    print('turn')
+    print('Turn for')
+    print(player)
     while player.alive:
         print('currentscore: ' + str(currentscore))
         print(*diceList)
