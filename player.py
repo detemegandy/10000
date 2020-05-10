@@ -1,10 +1,13 @@
 class player:
 
-    def __init__(self):
+    def __init__(self, name:str):
         self.score = 0
         self.alive = False
-        print('player')
+        self.name = name
     
+    def __repr__(self):
+        return self.name +' score: ' + str(self.score)
+        
     def onTable(self):
         return self.score > 1000
 
