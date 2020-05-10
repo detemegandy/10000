@@ -20,8 +20,6 @@ class dice():
     def save(self,side):
         if self.sideUp == side:
             self.saved = True
-            return 1
-        return 0
         
     def rollSaved(self):
         self.sideUp = random.randint(1,self.sides)
