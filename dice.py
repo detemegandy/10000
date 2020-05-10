@@ -6,7 +6,9 @@ class dice():
         self.saved = False
 
     def __repr__(self):
-        return "(sideUp: " + str(self.sideUp) + ", saved: " + str(self.saved)+")"
+        if self.saved:
+            return "(" + str(self.sideUp) + ")"
+        return str(self.sideUp)
 
     def __str__(self):
         return str(self.sideUp)
