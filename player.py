@@ -6,8 +6,10 @@ class player:
         self.name = name
     
     def __repr__(self):
-        return self.name +' score: ' + str(self.score)
-        
+        if not self.onTable():
+            return self.name
+        return self.name +'\nscore: ' + str(self.score)
+
     def onTable(self):
         return self.score > 1000
 

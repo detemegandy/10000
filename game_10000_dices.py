@@ -166,7 +166,6 @@ def askPick(choices: list):
     bad = True
     if not len(choices) == 1:
         for choice in choices:
-            print(' ')
             print('Choice '+ str(choices.index(choice)) + ': ' + str(choice[0]) +' '\
             + str(choice[2]) + '\'s for ' + str(choice[1]) + ' points?\n')
         while bad:
@@ -176,6 +175,8 @@ def askPick(choices: list):
             except ValueError:
                 bad = True
     else:
+        print('Choice 0: ' + str(choices[0][0]) +' '\
+            + str(choices[0][2]) + '\'s for ' + str(choices[0][1]) + ' points?\n')
         print('Pick : 0')
         answer = 0
     return answer
@@ -184,14 +185,21 @@ def askPick(choices: list):
 def turn(player,diceList:list):
     currentscore = 0
     player.alive = True
-    print('Turn for')
+    print('\n\n###################################################################################\nTurn for')
     print(player)
     while player.alive:
-        print('currentscore: ' + str(currentscore))
+        print('current score: ' + str(currentscore) + '\nDICE:')
         print(*diceList)
+
+        #find Choices from first throw
         choices = findChoices(diceList)
+
+        #no choices means bad luck turn over already
         if len(choices) == 0:
+            print('BAD LUCK!\nNothing to save on this throw!\n')
             break
+
+        #while choices available
         while len(choices):
             choices = findChoices(diceList)
             if choices[0][0]==6:
@@ -201,29 +209,57 @@ def turn(player,diceList:list):
             playerPick = -1
             while not -1 < playerPick < len(choices):
                 playerPick = askPick(choices)
+
+            #asking player for choice and removing same dice choice form choices
             numDice,score,face,choices = pick(playerPick,choices)
+
+            #saving the choice score
             currentscore += score
+
+            #setting dice to saved
             for element in diceList:
                 if element.sideUp == face and numDice:
                     numDice -= element.save(face)
+            
+            #if there are more choices ask player to pick another?
             while not playerPick=="y" and not playerPick == "n" and len(choices):
-                if player.onTable or currentscore > 999:
-                    playerPick = input('Do you want to pick another? (y/n): ')
-                else:
-                    continue
+                playerPick = input('Do you want to pick another? (y/n): ')
             if playerPick == "y":
                 continue
             elif playerPick == "n":
                 break
+
+        #counting number of free dice
         freeDice = sum(map(lambda dice: int(not dice.saved),diceList))
-        print("freeDice: " + str(freeDice))
-        if not freeDice:
+
+        #no free dice means you HAVE to roll again (rules of the game)
+        if not freeDice or freeDice == 6:
+            print('Rolling 6 dice again!')
             diceList = [dice.rollSaved() for dice in diceList]
+
+        #else the player can choose to stop and save, if player is on table or currentscore is over 1000
         else:
-            diceList = [dice.roll() for dice in diceList]
+            rollAgain = None           
+            print('player on table: ' + str(player.onTable()))
+            print(int(currentscore))
+            if player.onTable() or currentscore > 999:
+                while not rollAgain=="y" and not rollAgain == "n":
+                    rollAgain = input('Do you want to roll remaining ' + str(freeDice) + '? (y/n): ')
+            else:
+                print(player)
+                print('Is not on table yet, and current score is less than 1000, have to roll again.\n')
+            print('')
+            if not rollAgain == "n":
+                print('Rolling ' + str(freeDice) + ' again!')
+                diceList = [dice.roll() for dice in diceList]
+            else:
+                break
+
+    #turn done saving and showing results
     player.addScore(currentscore)
-    print('player score: ' + str(player.score))
-    print('turn done')
+    print('turn done for '+str(player))
+
+    #rolling for next player
     diceList = [dice.rollSaved() for dice in diceList]
 
 main()
